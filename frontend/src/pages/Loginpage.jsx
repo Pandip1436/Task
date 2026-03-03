@@ -233,7 +233,7 @@ export default function LoginPage() {
             onSuccess={async (credentialResponse) => {
               try {
                 const res = await axios.post(
-                  "http://localhost:3000/api/auth/google",
+                  "VITE_API_URL/auth/google",
                   {
                     credential: credentialResponse.credential,
                   }
