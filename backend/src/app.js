@@ -29,7 +29,7 @@ app.use(
 );
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "https://task-855.pages.dev/",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
