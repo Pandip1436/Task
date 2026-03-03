@@ -232,12 +232,12 @@ export default function LoginPage() {
           <GoogleLogin
             onSuccess={async (credentialResponse) => {
               try {
-                const res = await axios.post(
-                  "VITE_API_URL/auth/google",
-                  {
-                    credential: credentialResponse.credential,
-                  }
-                );
+               const res = await axios.post(
+                `${import.meta.env.VITE_API_URL}/auth/google`,
+                {
+                  credential: credentialResponse.credential,
+                }
+              );
 
                 localStorage.setItem("token", res.data.token);
                 localStorage.setItem("user", JSON.stringify(res.data.user));
