@@ -20,17 +20,33 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "script-src": ["'self'", "https://accounts.google.com", "https://apis.google.com"],
-        "frame-src": ["'self'", "https://accounts.google.com"],
-        "connect-src": ["'self'", "http://localhost:3000", "https://accounts.google.com"],
+        "script-src": [
+          "'self'",
+          "https://accounts.google.com",
+          "https://apis.google.com"
+        ],
+        "frame-src": [
+          "'self'",
+          "https://accounts.google.com"
+        ],
+        "connect-src": [
+          "'self'",
+          "http://localhost:5173",
+          "https://task-855.pages.dev",
+          "https://accounts.google.com"
+        ],
       },
     },
   })
 );
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://task-855.pages.dev"
+];
+
 app.use(cors({
-  origin: "https://task-855.pages.dev",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());

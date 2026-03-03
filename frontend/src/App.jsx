@@ -9,7 +9,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
 export default function App() {
-        console.log(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+        // console.log(import.meta.env.VITE_GOOGLE_CLIENT_ID);
 
   return (
     <div className="min-h-screen bg-gray-100">
