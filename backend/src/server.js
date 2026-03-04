@@ -18,4 +18,6 @@ initSocket(httpServer);
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log("EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 });
