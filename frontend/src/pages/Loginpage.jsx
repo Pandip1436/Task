@@ -228,31 +228,35 @@ export default function LoginPage() {
           </p>
         </div>
         
-        {/* Google Login */}
-        <div className="mb-6 items-center text-center ">
-          <GoogleLogin
-            onSuccess={async (credentialResponse) => {
-              try {
-               const res = await axios.post(
-                `${import.meta.env.VITE_API_URL}/auth/google`,
-                {
-                  credential: credentialResponse.credential,
-                }
-              );
+   {/* Google Login */}
+<div className="flex flex-col items-center mb-6 w-full">
 
-                localStorage.setItem("token", res.data.token);
-                localStorage.setItem("user", JSON.stringify(res.data.user));
+  {/* Google Button */}
+  <div className="flex justify-center w-full">
+    <GoogleLogin
+      onSuccess={async (credentialResponse) => {
+        try {
+          const res = await axios.post(
+            `${import.meta.env.VITE_API_URL}/auth/google`,
+            {
+              credential: credentialResponse.credential,
+            }
+          );
 
-                navigate("/");
-              } catch (err) {
-                setError("Google login failed");
-              }
-            }}
-            onError={() => {
-              setError("Google Login Failed");
-            }}
-          />
-        </div>
+          localStorage.setItem("token", res.data.token);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+
+          navigate("/");
+        } catch (err) {
+          setError("Google login failed");
+        }
+      }}
+      onError={() => {
+        setError("Google Login Failed");
+      }}
+    />
+  </div>
+</div>
         
 
         <div className="flex items-center my-4">
