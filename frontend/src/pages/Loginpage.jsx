@@ -229,7 +229,7 @@ export default function LoginPage() {
         </div>
         
         {/* Google Login */}
-        <div className="mb-6 items-center">
+        <div className="mb-6 items-center text-center ">
           <GoogleLogin
             onSuccess={async (credentialResponse) => {
               try {
