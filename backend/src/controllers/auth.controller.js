@@ -5,7 +5,7 @@ const twilio = require("twilio");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const { OAuth2Client } = require("google-auth-library");
-
+const nodemailer = require("nodemailer");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Initialize Twilio client
@@ -588,6 +588,8 @@ exports.googleLogin = async (req, res) => {
 /* ===============================
    FORGOT PASSWORD
 ================================= */
+
+
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -600,6 +602,7 @@ exports.forgotPassword = async (req, res) => {
       });
     }
 
+    // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
 
     const hashedToken = crypto
@@ -610,24 +613,33 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordToken = hashedToken;
     user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
-    await user.save();
+    await user.save({ validateBeforeSave: false });
 
+    // Reset URL
     const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 
     const message = `
       <h2>Password Reset Request</h2>
       <p>You requested a password reset.</p>
-      <p>Click below to reset your password:</p>
-      <a href="${resetURL}" target="_blank">${resetURL}</a>
+      <p>Click the link below to reset your password:</p>
+      <a href="${resetURL}">${resetURL}</a>
       <p>This link will expire in 15 minutes.</p>
     `;
 
-    await sendEmail({
-      email: user.email,
+    // Nodemailer transporter (without SMTP config)
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
       subject: "Password Reset - Task Manager",
-      message,
+      html: message,
     });
 
     res.status(200).json({
@@ -635,12 +647,15 @@ exports.forgotPassword = async (req, res) => {
     });
 
   } catch (error) {
-  console.error("FORGOT PASSWORD ERROR:", error);
-  res.status(500).json({
-    message: "Email could not be sent",
-    error: error.message
-  });
-}
+
+    console.error("FORGOT PASSWORD ERROR:", error);
+
+    res.status(500).json({
+      message: "Email could not be sent",
+      error: error.message,
+    });
+
+  }
 };
 
 
