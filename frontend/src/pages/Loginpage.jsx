@@ -227,8 +227,9 @@ export default function LoginPage() {
             {step === 1 ? "Login to your account" : "Verify your phone number"}
           </p>
         </div>
+        
         {/* Google Login */}
-        <div className="mb-6">
+        <div className="mb-6 items-center">
           <GoogleLogin
             onSuccess={async (credentialResponse) => {
               try {
@@ -252,6 +253,7 @@ export default function LoginPage() {
             }}
           />
         </div>
+        
 
         <div className="flex items-center my-4">
           <div className="flex-1 border-t"></div>
@@ -318,6 +320,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
+              
 
               {/* Password */}
               <div>
