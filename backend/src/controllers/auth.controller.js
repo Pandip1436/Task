@@ -635,9 +635,12 @@ exports.forgotPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Email could not be sent" });
-  }
+  console.error("FORGOT PASSWORD ERROR:", error);
+  res.status(500).json({
+    message: "Email could not be sent",
+    error: error.message
+  });
+}
 };
 
 
