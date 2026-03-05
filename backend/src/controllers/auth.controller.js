@@ -655,6 +655,7 @@ const transporter = nodemailer.createTransport({
 
     res.status(200).json({
       message: "Password reset email sent successfully",
+      message: "Password reset email sent successfully",
     });
 
   } catch (error) {
