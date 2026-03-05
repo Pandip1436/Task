@@ -630,17 +630,16 @@ exports.forgotPassword = async (req, res) => {
   // Replace your current transporter with this:
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false, // Must be false for Port 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  /* ADD THIS SECTION */
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000,
-  family: 4, // Forces Nodemailer to use IPv4
+  family: 4, // Keep this to stay on IPv4
   tls: {
+    // This is crucial for cloud servers to negotiate the handshake
+    ciphers: 'SSLv3',
     rejectUnauthorized: false,
   },
 });
