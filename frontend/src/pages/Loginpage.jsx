@@ -229,10 +229,10 @@ export default function LoginPage() {
         </div>
         
    {/* Google Login */}
-<div className="flex flex-col items-center mb-6 w-full">
+<div className="flex flex-col items-center mb-6 ">
 
   {/* Google Button */}
-  <div className="flex justify-center w-full">
+  <div className="flex justify-center ">
     <GoogleLogin
       onSuccess={async (credentialResponse) => {
         try {
