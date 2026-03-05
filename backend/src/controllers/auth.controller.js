@@ -628,7 +628,7 @@ exports.forgotPassword = async (req, res) => {
 
     // Nodemailer transporter (without SMTP config)
   // Replace your current transporter with this:
-cconst transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
