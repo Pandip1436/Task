@@ -1,9 +1,14 @@
 const Project = require("../models/Project");
+const { emitToBoardRoom, io } = require("../socket"); 
 
 /* CREATE PROJECT */
 exports.createProject = async (req, res) => {
   try {
     const project = await Project.create(req.body);
+
+    // 🔴 SOCKET EVENT
+    req.app.get("io").emit("project:created", { project });
+
     res.status(201).json(project);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -39,18 +44,27 @@ exports.updateProject = async (req, res) => {
       req.body,
       { new: true }
     );
+
     if (!project) return res.status(404).json({ message: "Project not found" });
+
+    // 🔴 SOCKET EVENT
+    req.app.get("io").emit("project:updated", { project });
+
     res.json(project);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
-
 /* DELETE PROJECT */
 exports.deleteProject = async (req, res) => {
   try {
     const project = await Project.findByIdAndDelete(req.params.id);
+
     if (!project) return res.status(404).json({ message: "Project not found" });
+
+    // 🔴 SOCKET EVENT
+    req.app.get("io").emit("project:deleted", { projectId: req.params.id });
+
     res.json({ message: "Project deleted successfully" });
   } catch (err) {
     res.status(400).json({ message: err.message });
