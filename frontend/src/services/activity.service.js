@@ -8,25 +8,17 @@ export const getActivityLogs = (boardId) => {
 export const createActivityLog = (logData) => {
   return api.post(`/activity`, logData, {
     headers: {
-      "x-socket-id": socketService.id || "",
+      "x-socket-id": socketService.id, // ✅ REQUIRED
     },
   });
 };
 
 export const deleteActivityLog = (logId) => {
-  return api.delete(`/activity/${logId}`, {
-    headers: {
-      "x-socket-id": socketService.id || "",
-    },
-  });
+  return api.delete(`/activity/${logId}`);
 };
 
 export const clearBoardActivityLogs = (boardId) => {
-  return api.delete(`/activity/board/${boardId}/clear`, {
-    headers: {
-      "x-socket-id": socketService.id || "",
-    },
-  });
+  return api.delete(`/activity/board/${boardId}/clear`);
 };
 
 export const getFilteredActivityLogs = (boardId, filters = {}) => {
