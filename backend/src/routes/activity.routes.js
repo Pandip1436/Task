@@ -4,6 +4,7 @@ const { protect } = require("../middleware/auth.middleware");
 
 const ActivityLog = require("../models/ActivityLog");
 const Board = require("../models/Board");
+const { emitToBoardRoom } = require("../socket");
 
 /**
  * @route   GET /api/activity/board/:boardId
@@ -44,29 +45,19 @@ router.get("/board/:boardId", protect, async (req, res) => {
   }
 });
 
-/**
- * @route   POST /api/activity
- * @desc    Create a new activity log entry
- * @access  Private
- */
 router.post("/", protect, async (req, res) => {
   try {
     const { boardId, type, message, entityType, entityId, metadata } = req.body;
 
-    // Validate required fields
     if (!boardId || !type || !message) {
-      return res.status(400).json({ 
-        message: "boardId, type, and message are required" 
-      });
+      return res.status(400).json({ message: "boardId, type, and message are required" });
     }
 
-    // Verify board exists
     const board = await Board.findById(boardId);
     if (!board) {
       return res.status(404).json({ message: "Board not found" });
     }
 
-    // Create activity log
     const activityLog = new ActivityLog({
       board: boardId,
       user: req.user.id,
@@ -78,9 +69,10 @@ router.post("/", protect, async (req, res) => {
     });
 
     await activityLog.save();
-
-    // Populate user data before returning
     await activityLog.populate("user", "name email");
+
+    // 🔴 SOCKET EMIT
+    emitToBoardRoom(boardId, "activity:created", { activity: activityLog });
 
     res.status(201).json(activityLog);
   } catch (error) {
@@ -89,11 +81,6 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-/**
- * @route   DELETE /api/activity/:id
- * @desc    Delete an activity log entry
- * @access  Private (admin/creator only)
- */
 router.delete("/:id", protect, async (req, res) => {
   try {
     const activityLog = await ActivityLog.findById(req.params.id);
@@ -102,12 +89,16 @@ router.delete("/:id", protect, async (req, res) => {
       return res.status(404).json({ message: "Activity log not found" });
     }
 
-    // Only allow creator or admin to delete
     if (activityLog.user.toString() !== req.user.id && !req.user.isAdmin) {
       return res.status(403).json({ message: "Not authorized" });
     }
 
     await activityLog.deleteOne();
+
+    // 🔴 SOCKET EMIT
+    emitToBoardRoom(activityLog.board.toString(), "activity:deleted", {
+      logId: req.params.id,
+    });
 
     res.json({ message: "Activity log deleted" });
   } catch (error) {
@@ -116,34 +107,29 @@ router.delete("/:id", protect, async (req, res) => {
   }
 });
 
-/**
- * @route   DELETE /api/activity/board/:boardId/clear
- * @desc    Clear all activity logs for a board
- * @access  Private (admin only)
- */
 router.delete("/board/:boardId/clear", protect, async (req, res) => {
   try {
     const { boardId } = req.params;
 
-    // Verify user is admin or board owner
     const board = await Board.findById(boardId);
     if (!board) {
       return res.status(404).json({ message: "Board not found" });
     }
 
-    // Delete all logs for this board
     const result = await ActivityLog.deleteMany({ board: boardId });
 
-    res.json({ 
-      message: "Activity logs cleared", 
-      deletedCount: result.deletedCount 
+    // 🔴 SOCKET EMIT
+    emitToBoardRoom(boardId, "activity:cleared", { boardId });
+
+    res.json({
+      message: "Activity logs cleared",
+      deletedCount: result.deletedCount,
     });
   } catch (error) {
     console.error("Error clearing activity logs:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 /**
  * @route   GET /api/activity/recent
  * @desc    Get recent activity across all boards user has access to
