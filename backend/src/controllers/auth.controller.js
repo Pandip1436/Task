@@ -634,19 +634,15 @@ const dns = require('dns');
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
+  port: 2525, // Try this alternative port
   secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  // This explicitly tells Node to resolve the hostname using IPv4 only
-  lookup: (hostname, options, callback) => {
-    dns.lookup(hostname, { family: 4 }, callback);
-  },
+  family: 4, 
   tls: {
-    rejectUnauthorized: false,
-    minVersion: "TLSv1.2"
+    rejectUnauthorized: false
   }
 });
 
