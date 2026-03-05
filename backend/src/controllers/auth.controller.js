@@ -628,20 +628,26 @@ exports.forgotPassword = async (req, res) => {
 
     // Nodemailer transporter (without SMTP config)
   // Replace your current transporter with this:
+const dns = require('dns');
+
+// ... inside your forgotPassword function
+
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, // Must be false for Port 587
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  family: 4, // Keep this to stay on IPv4
-  tls: {
-    // This is crucial for cloud servers to negotiate the handshake
-    ciphers: 'SSLv3',
-    rejectUnauthorized: false,
+  // This explicitly tells Node to resolve the hostname using IPv4 only
+  lookup: (hostname, options, callback) => {
+    dns.lookup(hostname, { family: 4 }, callback);
   },
+  tls: {
+    rejectUnauthorized: false,
+    minVersion: "TLSv1.2"
+  }
 });
 
     await transporter.sendMail({
