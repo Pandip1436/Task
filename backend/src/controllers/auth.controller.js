@@ -628,18 +628,21 @@ exports.forgotPassword = async (req, res) => {
 
     // Nodemailer transporter (without SMTP config)
   // Replace your current transporter with this:
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
+cconst transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
   port: 465,
-  secure: true, // Use SSL
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Ensure this is an "App Password"
+    pass: process.env.EMAIL_PASS,
   },
+  /* ADD THIS SECTION */
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000,
+  family: 4, // Forces Nodemailer to use IPv4
   tls: {
-    // This helps bypass some network restrictions on cloud providers
-    rejectUnauthorized: false 
-  }
+    rejectUnauthorized: false,
+  },
 });
 
     await transporter.sendMail({
