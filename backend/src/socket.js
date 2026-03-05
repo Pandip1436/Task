@@ -58,19 +58,5 @@ function emitToBoardRoom(boardId, event, payload, excludeSocketId = null) {
     io.to(room).emit(event, payload);
   }
 }
-function emitToAll(event, payload, excludeSocketId = null) {
-  if (!io) return;
-
-  if (excludeSocketId) {
-    io.except(excludeSocketId).emit(event, payload);
-  } else {
-    io.emit(event, payload);
-  }
-}
-
-module.exports = {
-  emitToBoardRoom,
-  emitToAll
-};
 
 module.exports = { initSocket, getIO, emitToBoardRoom };
