@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getProjects, createProject, deleteProject, updateProject } from "../services/project.service";
 import { logoutUser } from "../services/auth.service";
-import { socketService } from "../services/socket.service";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -37,36 +36,6 @@ export default function DashboardPage() {
     
     loadProjects();
   }, [navigate]);
-  useEffect(() => {
-  const socket = socketService.connect();
-
-  // listen for project events
-  socket.on("project:created", ({ project }) => {
-    setProjects(prev => {
-      const exists = prev.some(p => p._id === project._id);
-      if (exists) return prev;
-      return [...prev, project];
-    });
-  });
-
-  socket.on("project:updated", ({ project }) => {
-    setProjects(prev =>
-      prev.map(p => (p._id === project._id ? project : p))
-    );
-  });
-
-  socket.on("project:deleted", ({ projectId }) => {
-    setProjects(prev =>
-      prev.filter(p => p._id !== projectId)
-    );
-  });
-
-  return () => {
-    socket.off("project:created");
-    socket.off("project:updated");
-    socket.off("project:deleted");
-  };
-}, []);
 
   const loadProjects = async () => {
     try {
