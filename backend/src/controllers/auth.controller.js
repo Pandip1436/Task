@@ -634,15 +634,19 @@ const dns = require('dns');
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 2525, // Try this alternative port
+  port: 587,
   secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  family: 4, 
+  // This explicitly tells Node to resolve the hostname using IPv4 only
+  lookup: (hostname, options, callback) => {
+    dns.lookup(hostname, { family: 4 }, callback);
+  },
   tls: {
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
+    minVersion: "TLSv1.2"
   }
 });
 
@@ -654,7 +658,6 @@ const transporter = nodemailer.createTransport({
     });
 
     res.status(200).json({
-      message: "Password reset email sent successfully",
       message: "Password reset email sent successfully",
     });
 
