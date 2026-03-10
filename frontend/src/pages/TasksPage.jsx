@@ -200,12 +200,23 @@ const addTasks = async (aiTasks) => {
   }
 };
 
-  // ── DnD sensors ─────────────────────────────────────────────────────────────
-  const sensors = useSensors(
-    useSensor(PointerSensor,  { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor,    { activationConstraint: { delay: 250, tolerance: 10 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
+// ── DnD sensors ─────────────────────────────────────────────────────────────
+const sensors = useSensors(
+  useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 5,
+    },
+  }),
+  useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 120,
+      tolerance: 8,
+    },
+  }),
+  useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  })
+);
 
   const findColumnOfTask = useCallback((taskId) => {
     const entry = Object.entries(tasksRef.current).find(([, list]) => list.some(t => t._id === taskId));
@@ -876,7 +887,10 @@ const addTasks = async (aiTasks) => {
 
         {/* ══ KANBAN BOARD ════════════════════════════════════════════════════ */}
         <div className="max-w-[2000px] mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
-          <div className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none">
+          <div
+  className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
+  style={{ touchAction: "pan-x" }}
+>
             {columns.map((col, index) => {
               const columnTasks   = Array.isArray(tasks[col._id]) ? tasks[col._id] : [];
               const filteredTasks = filterTasks(columnTasks);
@@ -998,7 +1012,10 @@ const addTasks = async (aiTasks) => {
           .snap-x { scroll-padding-left: 12px; }
         }
 
-        [data-dnd-kit-draggable] { user-select: none; }
+        [data-dnd-kit-draggable] {
+          user-select: none;
+          touch-action: none;
+        }
       `}</style>
     </DndContext>
   );

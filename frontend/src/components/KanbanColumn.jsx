@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -64,23 +65,20 @@ export function SortableTaskCard({ task, accent, onTaskClick, searchQuery = "" }
   });
 
   const style = {
-    // CSS.Transform.toString converts the {x,y,scaleX,scaleY} object to a
-    // CSS transform string.  We deliberately skip scaleX/scaleY so the card
-    // doesn't shrink/grow during drag — only translate moves it.
-    transform: CSS.Transform.toString(
-      transform ? { ...transform, scaleX: 1, scaleY: 1 } : null
-    ),
-    transition,
-    // Raise the dragging card above its siblings
-    zIndex: isDragging ? 10 : undefined,
-  };
+  transform: CSS.Transform.toString(
+    transform ? { ...transform, scaleX: 1, scaleY: 1 } : null
+  ),
+  transition,
+  zIndex: isDragging ? 10 : undefined,
+  touchAction: "none",   
+};
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      className={`
-        group bg-white rounded-xl border select-none
+        ref={setNodeRef}
+        style={style}
+        className={`
+          group bg-white rounded-xl border select-none touch-none
         transition-[border-color,box-shadow,opacity] duration-150
         ${
           isDragging
@@ -95,9 +93,9 @@ export function SortableTaskCard({ task, accent, onTaskClick, searchQuery = "" }
       {/* listeners + attributes go on the handle, not the whole card, so that
           clicking the card body still opens the modal without starting a drag. */}
       <div
-        {...listeners}
-        {...attributes}
-        className="flex items-center px-3 pt-3 pb-0 cursor-grab active:cursor-grabbing"
+  {...listeners}
+  {...attributes}
+  className="flex items-center px-3 pt-3 pb-0 cursor-grab active:cursor-grabbing touch-none"
         onClick={(e) => e.stopPropagation()} // don't open modal when grabbing
         aria-label="Drag task"
       >
