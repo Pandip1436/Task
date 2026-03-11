@@ -204,19 +204,30 @@ const addTasks = async (aiTasks) => {
 const sensors = useSensors(
   useSensor(PointerSensor, {
     activationConstraint: {
-      distance: 5,
-    },
+      distance: 8
+    }
   }),
   useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 120,
-      tolerance: 8,
-    },
+      delay: 150,
+      tolerance: 8
+    }
   }),
   useSensor(KeyboardSensor, {
-    coordinateGetter: sortableKeyboardCoordinates,
+    coordinateGetter: sortableKeyboardCoordinates
   })
 );
+const taskColumnMap = useMemo(() => {
+  const map = {};
+  Object.entries(tasks).forEach(([colId, list]) => {
+    list.forEach(task => {
+      map[task._id] = colId;
+    });
+  });
+  return map;
+}, [tasks]);
+
+
 
   const findColumnOfTask = useCallback((taskId) => {
     const entry = Object.entries(tasksRef.current).find(([, list]) => list.some(t => t._id === taskId));
@@ -226,7 +237,7 @@ const sensors = useSensors(
   const handleDragStart = useCallback(({ active }) => {
     const data = active.data.current;
     if (data?.type === "task") {
-      setActiveTask(data.task);
+      setActiveTask({ ...data.task });
       setActiveColId(data.columnId ?? findColumnOfTask(active.id));
     }
   }, [findColumnOfTask]);
@@ -261,7 +272,10 @@ const sensors = useSensors(
     setActiveColId(null);
     if (!over) return;
     const overData  = over.data.current;
-    const destColId = overData?.type === "column" ? over.id : findColumnOfTask(active.id);
+    const destColId =
+  overData?.type === "column"
+    ? over.id
+    : findColumnOfTask(over.id);
     if (!srcColId || !destColId || srcColId === destColId) return;
     const destColName = columns.find(c => c._id === destColId)?.name || "column";
     logActivity("move", `"${taskTitle}" moved to ${destColName}`);
@@ -889,7 +903,7 @@ const sensors = useSensors(
         <div className="max-w-500 mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
           <div
               className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
-              style={{ touchAction: "pan-x" }}
+              style={{ touchAction: "pan-x pan-y" }}
             >
             {columns.map((col, index) => {
               const columnTasks   = Array.isArray(tasks[col._id]) ? tasks[col._id] : [];
