@@ -204,12 +204,12 @@ const addTasks = async (aiTasks) => {
 const sensors = useSensors(
   useSensor(PointerSensor, {
     activationConstraint: {
-      distance: 8,
+      distance: 5,
     },
   }),
   useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 150,
+      delay: 120,
       tolerance: 8,
     },
   }),
@@ -218,20 +218,10 @@ const sensors = useSensors(
   })
 );
 
-const taskColumnMap = useMemo(() => {
-  const map = {};
-  Object.entries(tasks).forEach(([colId, list]) => {
-    list.forEach(task => {
-      map[task._id] = colId;
-    });
-  });
-  return map;
-}, [tasks]);
-
-const findColumnOfTask = useCallback(
-  (taskId) => taskColumnMap[taskId] || null,
-  [taskColumnMap]
-);
+  const findColumnOfTask = useCallback((taskId) => {
+    const entry = Object.entries(tasksRef.current).find(([, list]) => list.some(t => t._id === taskId));
+    return entry ? entry[0] : null;
+  }, []);
 
   const handleDragStart = useCallback(({ active }) => {
     const data = active.data.current;
@@ -263,40 +253,26 @@ const findColumnOfTask = useCallback(
       return { ...prev, [srcColId]: srcList, [destColId]: destList };
     });
   }, [findColumnOfTask]);
-const handleDragEnd = useCallback(async ({ active, over }) => {
-  const srcColId  = activeColId;
-  const taskTitle = activeTask?.title || "Task";
 
-  setActiveTask({ ...data.task });
-  setActiveColId(null);
-
-  if (!over) return;
-
-  const overData = over.data.current;
-
-  const destColId =
-    overData?.type === "column"
-      ? over.id
-      : findColumnOfTask(over.id);
-
-  if (!srcColId || !destColId || srcColId === destColId) return;
-
-  const destColName = columns.find(c => c._id === destColId)?.name || "column";
-
-  logActivity("move", `"${taskTitle}" moved to ${destColName}`);
-
-  try {
-    await updateTask(active.id, { columnId: destColId });
-  } catch (err) {
-    if (err.response?.status === 401) {
-      navigate("/login");
-      return;
+  const handleDragEnd = useCallback(async ({ active, over }) => {
+    const srcColId  = activeColId;
+    const taskTitle = activeTask?.title || "Task";
+    setActiveTask(null);
+    setActiveColId(null);
+    if (!over) return;
+    const overData  = over.data.current;
+    const destColId = overData?.type === "column" ? over.id : findColumnOfTask(active.id);
+    if (!srcColId || !destColId || srcColId === destColId) return;
+    const destColName = columns.find(c => c._id === destColId)?.name || "column";
+    logActivity("move", `"${taskTitle}" moved to ${destColName}`);
+    try {
+      await updateTask(active.id, { columnId: destColId });
+    } catch (err) {
+      if (err.response?.status === 401) { navigate("/login"); return; }
+      setError("Failed to move task — reverting changes");
+      load();
     }
-
-    setError("Failed to move task — reverting changes");
-    load();
-  }
-}, [activeColId, activeTask, columns, findColumnOfTask, load, logActivity, navigate]);
+  }, [activeColId, activeTask, columns, findColumnOfTask, load, logActivity, navigate]);
 
   // ── Column management ───────────────────────────────────────────────────────
   const addColumn = async () => {
@@ -913,7 +889,7 @@ const handleDragEnd = useCallback(async ({ active, over }) => {
         <div className="max-w-500 mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
           <div
               className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
-              style={{ touchAction: "pan-y" }}
+              style={{ touchAction: "pan-x" }}
             >
             {columns.map((col, index) => {
               const columnTasks   = Array.isArray(tasks[col._id]) ? tasks[col._id] : [];
