@@ -204,13 +204,12 @@ const addTasks = async (aiTasks) => {
 const sensors = useSensors(
   useSensor(PointerSensor, {
     activationConstraint: {
-     delay: 200,
-      tolerance: 5
+      distance: 5,
     },
   }),
   useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 250,
+      delay: 120,
       tolerance: 8,
     },
   }),
