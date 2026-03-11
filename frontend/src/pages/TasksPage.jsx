@@ -204,17 +204,9 @@ const addTasks = async (aiTasks) => {
 const sensors = useSensors(
   useSensor(PointerSensor, {
     activationConstraint: {
-      distance: 5,
-    },
-  }),
-  useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 120,
-      tolerance: 8,
-    },
-  }),
-  useSensor(KeyboardSensor, {
-    coordinateGetter: sortableKeyboardCoordinates,
+      delay: 200,
+      tolerance: 5
+    }
   })
 );
 
