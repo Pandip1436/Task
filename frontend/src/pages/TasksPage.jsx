@@ -201,23 +201,31 @@ const addTasks = async (aiTasks) => {
 };
 
 // ── DnD sensors ─────────────────────────────────────────────────────────────
+// const sensors = useSensors(
+//   useSensor(PointerSensor, {
+//     activationConstraint: {
+//       distance: 5,
+//     },
+//   }),
+//   useSensor(TouchSensor, {
+//     activationConstraint: {
+//       delay: 120,
+//       tolerance: 8,
+//     },
+//   }),
+//   useSensor(KeyboardSensor, {
+//     coordinateGetter: sortableKeyboardCoordinates,
+//   })
+// );
+
 const sensors = useSensors(
-  useSensor(PointerSensor, {
-    activationConstraint: {
-      distance: 5,
-    },
-  }),
   useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 120,
-      tolerance: 8,
-    },
-  }),
-  useSensor(KeyboardSensor, {
-    coordinateGetter: sortableKeyboardCoordinates,
+      delay: 250,     // hold time before drag
+      tolerance: 5
+    }
   })
 );
-
   const findColumnOfTask = useCallback((taskId) => {
     const entry = Object.entries(tasksRef.current).find(([, list]) => list.some(t => t._id === taskId));
     return entry ? entry[0] : null;
