@@ -234,7 +234,7 @@ export default function KanbanColumn({
   const isDragOver = isOver;
 
   return (
-    <div className="w-[280px] sm:w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col">
+    <div className="w-[300px] sm:w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col">
       <div
         className="bg-white/80 backdrop-blur-sm rounded-2xl border shadow-xl overflow-hidden flex flex-col h-full transition-all duration-200"
         style={

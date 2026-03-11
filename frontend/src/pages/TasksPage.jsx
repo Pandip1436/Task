@@ -886,7 +886,7 @@ const sensors = useSensors(
         </div>
 
         {/* ══ KANBAN BOARD ════════════════════════════════════════════════════ */}
-        <div className="max-w-[2000px] mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
+        <div className="max-w-500 mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
           <div
               className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
               style={{ touchAction: "pan-x" }}
@@ -896,7 +896,7 @@ const sensors = useSensors(
               const filteredTasks = filterTasks(columnTasks);
               const isCollapsed   = collapsedColumns.has(col._id);
               return (
-                <div key={col._id} className="snap-start shrink-0 w-[70vw] sm:w-100 md:w-100 lg:w-80 xl:w-90">
+                <div key={col._id} className="snap-start shrink-0  sm:w-100 md:w-100 lg:w-80 xl:w-90">
                   <KanbanColumn
                     column={col}
                     columnIndex={index}
