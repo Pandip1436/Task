@@ -896,7 +896,7 @@ const sensors = useSensors(
               const filteredTasks = filterTasks(columnTasks);
               const isCollapsed   = collapsedColumns.has(col._id);
               return (
-                <div key={col._id} className="snap-start flex-shrink-0 w-[85vw] sm:w-[340px] md:w-[300px] lg:w-[320px] xl:w-[360px]">
+                <div key={col._id} className="snap-start shrink-0 w-[70vw] sm:w-100 md:w-100 lg:w-80 xl:w-90">
                   <KanbanColumn
                     column={col}
                     columnIndex={index}
