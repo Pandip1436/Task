@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   DndContext, DragOverlay, PointerSensor, KeyboardSensor, TouchSensor,
-  useSensor, useSensors, closestCenter, defaultDropAnimationSideEffects,
+  useSensor, useSensors, closestCorners, defaultDropAnimationSideEffects,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
@@ -204,17 +204,15 @@ const addTasks = async (aiTasks) => {
 const sensors = useSensors(
   useSensor(PointerSensor, {
     activationConstraint: {
-      distance: 8,
+      distance: 5,
     },
   }),
-
   useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 200,   
-      tolerance: 5,    
+      delay: 120,
+      tolerance: 8,
     },
   }),
-
   useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
   })
@@ -451,7 +449,7 @@ const sensors = useSensors(
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
@@ -891,10 +889,7 @@ const sensors = useSensors(
         <div className="max-w-500 mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
           <div
               className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
-              style={{
-                touchAction: "pan-x",
-                WebkitOverflowScrolling: "touch"
-              }}
+              style={{ touchAction: "pan-x" }}
             >
             {columns.map((col, index) => {
               const columnTasks   = Array.isArray(tasks[col._id]) ? tasks[col._id] : [];
@@ -990,7 +985,7 @@ const sensors = useSensors(
       </div>
 
       <DragOverlay dropAnimation={DROP_ANIMATION}>
-        {activeTask ? <OverlayCard task={activeTask} /> : null}
+        <OverlayCard task={activeTask} />
       </DragOverlay>
 
       <style>{`
