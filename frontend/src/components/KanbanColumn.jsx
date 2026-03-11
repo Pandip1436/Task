@@ -70,7 +70,7 @@ export function SortableTaskCard({ task, accent, onTaskClick, searchQuery = "" }
   ),
   transition,
   zIndex: isDragging ? 10 : undefined,
-  touchAction: "none",   
+  touchAction: "manipulation",   
 };
 
   return (
@@ -78,7 +78,7 @@ export function SortableTaskCard({ task, accent, onTaskClick, searchQuery = "" }
         ref={setNodeRef}
         style={style}
         className={`
-          group bg-white rounded-xl border select-none touch-none
+          group bg-white rounded-xl border select-none 
         transition-[border-color,box-shadow,opacity] duration-150
         ${
           isDragging
@@ -95,7 +95,8 @@ export function SortableTaskCard({ task, accent, onTaskClick, searchQuery = "" }
       <div
   {...listeners}
   {...attributes}
-  className="flex items-center px-3 pt-3 pb-0 cursor-grab active:cursor-grabbing touch-none"
+  className="flex items-center px-3 pt-3 pb-0 cursor-grab active:cursor-grabbing "
+  style={{ touchAction: "none" }}
         onClick={(e) => e.stopPropagation()} // don't open modal when grabbing
         aria-label="Drag task"
       >
