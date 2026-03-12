@@ -253,7 +253,6 @@ const taskColumnMap = useMemo(() => {
       : findColumnOfTask(over.id);
 
   if (!srcColId || !destColId) return;
-
   if (srcColId === destColId && over.id === active.id) return;
     setTasks(prev => {
       const srcList  = [...(prev[srcColId]  || [])];
