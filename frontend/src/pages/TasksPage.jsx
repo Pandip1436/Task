@@ -628,6 +628,8 @@ if (srcColId === destColId && active.id === over.id) return;
                 </svg>
                 <input
                   type="text"
+                  id="task-search"
+                  name="taskSearch"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search tasks by title or description…"
@@ -769,6 +771,8 @@ if (srcColId === destColId && active.id === over.id) return;
                 </div>
                 <select
                   value={sortBy}
+                    id="sort-tasks"
+                   name="sortTasks"
                   onChange={e => setSortBy(e.target.value)}
                   className={`border-2 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 transition-all cursor-pointer shadow-sm ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200 hover:border-indigo-400" : "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 text-gray-700 hover:border-indigo-300"}`}
                 >
@@ -791,6 +795,8 @@ if (srcColId === destColId && active.id === over.id) return;
             </svg>
             <input
               type="text"
+              id="task-search"
+              name="taskSearch"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search tasks…"
@@ -889,6 +895,8 @@ if (srcColId === destColId && active.id === over.id) return;
                 <input
                   className={`flex-1 border-2 focus:border-indigo-400 px-3 sm:px-4 py-2 sm:py-2.5 md:py-3 rounded-xl outline-none transition-all placeholder-gray-400 font-medium shadow-sm text-sm sm:text-base ${darkMode ? "bg-gray-700 border-gray-600 text-gray-100" : "bg-white/80 border-gray-200"}`}
                   placeholder="Add a new column…"
+                  id="new-column"
+                  name="newColumn"
                   value={newColumn}
                   onChange={e => setNewColumn(e.target.value)}
                   onKeyPress={e => handleKeyPress(e, addColumn)}
