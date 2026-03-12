@@ -267,27 +267,43 @@ const taskColumnMap = useMemo(() => {
   }, [findColumnOfTask]);
 
   const handleDragEnd = useCallback(async ({ active, over }) => {
-    const srcColId  = activeColId;
-    const taskTitle = activeTask?.title || "Task";
-    setActiveTask(null);
-    setActiveColId(null);
-    if (!over) return;
-    const overData  = over.data.current;
-    const destColId =
-  overData?.type === "column"
-    ? over.id
-    : findColumnOfTask(over.id);
-    if (!srcColId || !destColId || srcColId === destColId) return;
-    const destColName = columns.find(c => c._id === destColId)?.name || "column";
+  const srcColId  = activeColId;
+  const taskTitle = activeTask?.title || "Task";
+
+  setActiveTask(null);
+  setActiveColId(null);
+
+  if (!over) return;
+
+  const overData = over.data.current;
+
+  const destColId =
+    overData?.type === "column"
+      ? over.id
+      : findColumnOfTask(over.id);
+
+  if (!srcColId || !destColId) return;
+
+  const destColName =
+    columns.find(c => c._id === destColId)?.name || "column";
+
+  // Only log when column actually changes
+  if (srcColId !== destColId) {
     logActivity("move", `"${taskTitle}" moved to ${destColName}`);
-    try {
-      await updateTask(active.id, { columnId: destColId });
-    } catch (err) {
-      if (err.response?.status === 401) { navigate("/login"); return; }
-      setError("Failed to move task — reverting changes");
-      load();
+  }
+
+  try {
+    await updateTask(active.id, { columnId: destColId });
+  } catch (err) {
+    if (err.response?.status === 401) {
+      navigate("/login");
+      return;
     }
-  }, [activeColId, activeTask, columns, findColumnOfTask, load, logActivity, navigate]);
+
+    setError("Failed to move task — reverting changes");
+    load();
+  }
+}, [activeColId, activeTask, columns, findColumnOfTask, load, logActivity, navigate]);
 
   // ── Column management ───────────────────────────────────────────────────────
   const addColumn = async () => {
