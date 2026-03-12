@@ -229,9 +229,10 @@ const taskColumnMap = useMemo(() => {
 
 
 
- const findColumnOfTask = useCallback((taskId) => {
-  return taskColumnMap[taskId] || null;
-}, [taskColumnMap]);
+  const findColumnOfTask = useCallback((taskId) => {
+    const entry = Object.entries(tasksRef.current).find(([, list]) => list.some(t => t._id === taskId));
+    return entry ? entry[0] : null;
+  }, []);
 
   const handleDragStart = useCallback(({ active }) => {
     const data = active.data.current;
@@ -242,18 +243,11 @@ const taskColumnMap = useMemo(() => {
   }, [findColumnOfTask]);
 
   const handleDragOver = useCallback(({ active, over }) => {
-  if (!over || active.id === over.id) return;
-
-  const srcColId = findColumnOfTask(active.id);
-
-  const overData = over?.data?.current;
-  const destColId =
-    overData?.type === "column"
-      ? over.id
-      : findColumnOfTask(over.id);
-
-  if (!srcColId || !destColId) return;
-if (srcColId === destColId && active.id === over.id) return;
+    if (!over || active.id === over.id) return;
+    const srcColId  = findColumnOfTask(active.id);
+    const overData  = over.data.current;
+    const destColId = overData?.type === "column" ? over.id : findColumnOfTask(over.id);
+    if (!srcColId || !destColId) return;
     setTasks(prev => {
       const srcList  = [...(prev[srcColId]  || [])];
       const destList = srcColId === destColId ? srcList : [...(prev[destColId] || [])];
@@ -277,8 +271,7 @@ if (srcColId === destColId && active.id === over.id) return;
     setActiveTask(null);
     setActiveColId(null);
     if (!over) return;
-    if (active.id === over.id) return;
-    const overData = over?.data?.current;
+    const overData  = over.data.current;
     const destColId =
   overData?.type === "column"
     ? over.id
@@ -470,7 +463,6 @@ if (srcColId === destColId && active.id === over.id) return;
   return (
     <DndContext
       sensors={sensors}
-      autoScroll={true}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
@@ -628,8 +620,6 @@ if (srcColId === destColId && active.id === over.id) return;
                 </svg>
                 <input
                   type="text"
-                  id="task-search"
-                  name="taskSearch"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search tasks by title or description…"
@@ -771,8 +761,6 @@ if (srcColId === destColId && active.id === over.id) return;
                 </div>
                 <select
                   value={sortBy}
-                    id="sort-tasks"
-                   name="sortTasks"
                   onChange={e => setSortBy(e.target.value)}
                   className={`border-2 rounded-lg px-3 py-1.5 text-xs font-semibold outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 transition-all cursor-pointer shadow-sm ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200 hover:border-indigo-400" : "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 text-gray-700 hover:border-indigo-300"}`}
                 >
@@ -795,8 +783,6 @@ if (srcColId === destColId && active.id === over.id) return;
             </svg>
             <input
               type="text"
-              id="taskMobile-search"
-              name="taskMobileSearch"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search tasks…"
@@ -895,8 +881,6 @@ if (srcColId === destColId && active.id === over.id) return;
                 <input
                   className={`flex-1 border-2 focus:border-indigo-400 px-3 sm:px-4 py-2 sm:py-2.5 md:py-3 rounded-xl outline-none transition-all placeholder-gray-400 font-medium shadow-sm text-sm sm:text-base ${darkMode ? "bg-gray-700 border-gray-600 text-gray-100" : "bg-white/80 border-gray-200"}`}
                   placeholder="Add a new column…"
-                  id="new-column"
-                  name="newColumn"
                   value={newColumn}
                   onChange={e => setNewColumn(e.target.value)}
                   onKeyPress={e => handleKeyPress(e, addColumn)}
@@ -916,10 +900,10 @@ if (srcColId === destColId && active.id === over.id) return;
         </div>
 
         {/* ══ KANBAN BOARD ════════════════════════════════════════════════════ */}
-        <div className="max-w-[2000px] mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
+        <div className="max-w-500 mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
           <div
               className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
-              style={{ touchAction: "pan-y" }}
+              
             >
             {columns.map((col, index) => {
               const columnTasks   = Array.isArray(tasks[col._id]) ? tasks[col._id] : [];
@@ -1015,7 +999,7 @@ if (srcColId === destColId && active.id === over.id) return;
       </div>
 
       <DragOverlay dropAnimation={DROP_ANIMATION}>
-        {activeTask && <OverlayCard task={activeTask} />}
+        <OverlayCard task={activeTask} />
       </DragOverlay>
 
       <style>{`
@@ -1041,14 +1025,10 @@ if (srcColId === destColId && active.id === over.id) return;
         @media (max-width: 640px) {
           .snap-x { scroll-padding-left: 12px; }
         }
-        [data-dnd-kit-drag-overlay] {
-          pointer-events: none;
-          will-change: transform;
-        }
 
         [data-dnd-kit-draggable] {
-          user-select: none;
-        }
+  user-select: none;
+}
       `}</style>
     </DndContext>
   );
