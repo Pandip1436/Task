@@ -73,8 +73,6 @@ export default function AITaskGenerator({ addTasks }) {
           {/* ── Input + Button ── */}
           <div className="flex gap-2 mb-3">
             <input
-              id="Ai"
-              name="Aitask"
               type="text"
               placeholder="e.g. Build a user authentication system"
               value={goal}
