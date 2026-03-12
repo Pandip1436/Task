@@ -463,6 +463,7 @@ const taskColumnMap = useMemo(() => {
   return (
     <DndContext
       sensors={sensors}
+      autoScroll={true}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
