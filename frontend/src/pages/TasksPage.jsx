@@ -194,7 +194,6 @@ const addTasks = async (aiTasks) => {
         ...createdTasks.map(res => res.data)
       ]
     }));
-    logActivity("create", `AI generated ${aiTasks.length} tasks`);
 
   } catch (err) {
     console.error("Failed to create AI tasks", err);
@@ -243,18 +242,11 @@ const taskColumnMap = useMemo(() => {
   }, [findColumnOfTask]);
 
   const handleDragOver = useCallback(({ active, over }) => {
-  if (!over || active.id === over.id) return;
-
-  const srcColId = findColumnOfTask(active.id);
-
-  const overData = over?.data?.current;
-  const destColId =
-    overData?.type === "column"
-      ? over.id
-      : findColumnOfTask(over.id);
-
-  if (!srcColId || !destColId) return;
-  if (srcColId === destColId && over.id === active.id) return;
+    if (!over || active.id === over.id) return;
+    const srcColId  = findColumnOfTask(active.id);
+    const overData  = over.data.current;
+    const destColId = overData?.type === "column" ? over.id : findColumnOfTask(over.id);
+    if (!srcColId || !destColId) return;
     setTasks(prev => {
       const srcList  = [...(prev[srcColId]  || [])];
       const destList = srcColId === destColId ? srcList : [...(prev[destColId] || [])];
@@ -272,59 +264,29 @@ const taskColumnMap = useMemo(() => {
     });
   }, [findColumnOfTask]);
 
-const handleDragEnd = useCallback(async ({ active, over }) => {
-  const srcColId  = activeColId;
-  const taskTitle = activeTask?.title || "Task";
-
-  setActiveTask(null);
-  setActiveColId(null);
-
-  if (!over) return;
-  if (active.id === over.id) return;
-
-  const overData = over?.data?.current;
-
-  const destColId =
-    overData?.type === "column"
-      ? over.id
-      : findColumnOfTask(over.id);
-
-  if (!srcColId || !destColId) return;
-
-  const srcColName  = columns.find(c => c._id === srcColId)?.name || "column";
-  const destColName = columns.find(c => c._id === destColId)?.name || "column";
-
-  try {
-
-    if (srcColId !== destColId) {
+  const handleDragEnd = useCallback(async ({ active, over }) => {
+    const srcColId  = activeColId;
+    const taskTitle = activeTask?.title || "Task";
+    setActiveTask(null);
+    setActiveColId(null);
+    if (!over) return;
+    if (active.id === over.id) return;
+    const overData  = over.data.current;
+    const destColId =
+  overData?.type === "column"
+    ? over.id
+    : findColumnOfTask(over.id);
+    if (!srcColId || !destColId || srcColId === destColId) return;
+    const destColName = columns.find(c => c._id === destColId)?.name || "column";
+    logActivity("move", `"${taskTitle}" moved to ${destColName}`);
+    try {
       await updateTask(active.id, { columnId: destColId });
-
-      logActivity(
-        "move",
-        `"${taskTitle}" moved from ${srcColName} → ${destColName}`,
-        "task",
-        active.id
-      );
-    } else {
-      logActivity(
-        "reorder",
-        `"${taskTitle}" reordered in ${srcColName}`,
-        "task",
-        active.id
-      );
+    } catch (err) {
+      if (err.response?.status === 401) { navigate("/login"); return; }
+      setError("Failed to move task — reverting changes");
+      load();
     }
-
-  } catch (err) {
-    if (err.response?.status === 401) {
-      navigate("/login");
-      return;
-    }
-
-    setError("Failed to move task — reverting changes");
-    load();
-  }
-
-}, [activeColId, activeTask, columns, findColumnOfTask, load, logActivity, navigate]);
+  }, [activeColId, activeTask, columns, findColumnOfTask, load, logActivity, navigate]);
 
   // ── Column management ───────────────────────────────────────────────────────
   const addColumn = async () => {
@@ -1065,9 +1027,8 @@ const handleDragEnd = useCallback(async ({ active, over }) => {
           .snap-x { scroll-padding-left: 12px; }
         }
         [data-dnd-kit-drag-overlay] {
-          pointer-events: none;
-          will-change: transform;
-        }
+        pointer-events: none;
+      }
 
         [data-dnd-kit-draggable] {
           user-select: none;
