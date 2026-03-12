@@ -233,16 +233,26 @@ const taskColumnMap = useMemo(() => {
   return taskColumnMap[taskId] || null;
 }, [taskColumnMap]);
 
-  const handleDragStart = useCallback(({ active }) => {
-    const data = active.data.current;
-    if (data?.type === "task") {
-      setActiveTask({ ...data.task });
-      setActiveColId(data.columnId ?? findColumnOfTask(active.id));
-    }
-  }, [findColumnOfTask]);
+ const handleDragStart = useCallback(({ active, activatorEvent }) => {
+
+  if (activatorEvent?.preventDefault) {
+    activatorEvent.preventDefault();
+  }
+
+  document.body.style.overflow = "hidden";
+
+  const data = active.data.current;
+
+  if (data?.type === "task") {
+    setActiveTask({ ...data.task });
+    setActiveColId(data.columnId ?? findColumnOfTask(active.id));
+  }
+
+}, [findColumnOfTask]);
 
   const handleDragOver = useCallback(({ active, over }) => {
   if (!over || active.id === over.id) return;
+  document.body.style.overflow = "";
 
   const srcColId = findColumnOfTask(active.id);
 
@@ -911,7 +921,10 @@ const taskColumnMap = useMemo(() => {
         <div className="max-w-[2000px] mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
           <div
               className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
-              style={{ touchAction: "pan-y" }}
+              style={{
+                        touchAction: "pan-y",
+                        WebkitOverflowScrolling: "touch"
+                      }}
             >
             {columns.map((col, index) => {
               const columnTasks   = Array.isArray(tasks[col._id]) ? tasks[col._id] : [];
