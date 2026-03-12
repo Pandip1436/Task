@@ -194,6 +194,7 @@ const addTasks = async (aiTasks) => {
         ...createdTasks.map(res => res.data)
       ]
     }));
+    logActivity("create", `AI generated ${aiTasks.length} tasks`);
 
   } catch (err) {
     console.error("Failed to create AI tasks", err);
