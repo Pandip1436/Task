@@ -204,13 +204,13 @@ const addTasks = async (aiTasks) => {
 const sensors = useSensors(
   useSensor(PointerSensor, {
     activationConstraint: {
-      distance: 4
+      distance: 8
     }
   }),
   useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 120,
-      tolerance: 6
+      delay: 180,
+      tolerance: 8
     }
   }),
   useSensor(KeyboardSensor, {
@@ -240,6 +240,7 @@ const taskColumnMap = useMemo(() => {
   }
 
   document.body.style.overflow = "hidden";
+document.body.style.touchAction = "none";
 
   const data = active.data.current;
 
@@ -252,7 +253,6 @@ const taskColumnMap = useMemo(() => {
 
   const handleDragOver = useCallback(({ active, over }) => {
   if (!over || active.id === over.id) return;
-
   const srcColId = findColumnOfTask(active.id);
 
   const overData = over?.data?.current;
@@ -262,7 +262,7 @@ const taskColumnMap = useMemo(() => {
       : findColumnOfTask(over.id);
 
   if (!srcColId || !destColId) return;
-  if (srcColId === destColId && over.id === active.id) return;
+if (active.id === over.id) return;
     setTasks(prev => {
       const srcList  = [...(prev[srcColId]  || [])];
       const destList = srcColId === destColId ? srcList : [...(prev[destColId] || [])];
@@ -281,6 +281,8 @@ const taskColumnMap = useMemo(() => {
   }, [findColumnOfTask]);
 
   const handleDragEnd = useCallback(async ({ active, over }) => {
+    document.body.style.overflow = "";
+document.body.style.touchAction = "";
     const srcColId  = activeColId;
     const taskTitle = activeTask?.title || "Task";
     setActiveTask(null);
@@ -484,6 +486,7 @@ const taskColumnMap = useMemo(() => {
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
+      onDragCancel={handleDragEnd}
     >
       <div className={`min-h-screen transition-colors duration-300 ${darkMode ? "bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950" : "bg-gradient-to-br from-indigo-300 via-purple-300 to-pink-300"}`}>
 
@@ -920,7 +923,10 @@ const taskColumnMap = useMemo(() => {
         <div className="max-w-[2000px] mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
           <div
               className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
-              style={{ touchAction: "pan-y" }}
+              style={{
+                  touchAction: "pan-y",
+                  WebkitOverflowScrolling: "touch"
+                }}
             >
             {columns.map((col, index) => {
               const columnTasks   = Array.isArray(tasks[col._id]) ? tasks[col._id] : [];
@@ -1049,6 +1055,19 @@ const taskColumnMap = useMemo(() => {
 
         [data-dnd-kit-draggable] {
           user-select: none;
+        }
+          [data-dnd-kit-draggable] {
+            user-select: none;
+            touch-action: none;
+            transform: translate3d(0,0,0);
+            will-change: transform;
+          }
+        [data-dnd-kit-draggable] {
+          touch-action: none;
+        }
+
+        html, body {
+          overscroll-behavior: none;
         }
       `}</style>
     </DndContext>
