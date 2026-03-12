@@ -194,6 +194,7 @@ const addTasks = async (aiTasks) => {
         ...createdTasks.map(res => res.data)
       ]
     }));
+    logActivity("create", `AI generated ${aiTasks.length} tasks`);
 
   } catch (err) {
     console.error("Failed to create AI tasks", err);
@@ -229,10 +230,9 @@ const taskColumnMap = useMemo(() => {
 
 
 
-  const findColumnOfTask = useCallback((taskId) => {
-    const entry = Object.entries(tasksRef.current).find(([, list]) => list.some(t => t._id === taskId));
-    return entry ? entry[0] : null;
-  }, []);
+ const findColumnOfTask = useCallback((taskId) => {
+  return taskColumnMap[taskId] || null;
+}, [taskColumnMap]);
 
   const handleDragStart = useCallback(({ active }) => {
     const data = active.data.current;
@@ -243,11 +243,18 @@ const taskColumnMap = useMemo(() => {
   }, [findColumnOfTask]);
 
   const handleDragOver = useCallback(({ active, over }) => {
-    if (!over || active.id === over.id) return;
-    const srcColId  = findColumnOfTask(active.id);
-    const overData  = over.data.current;
-    const destColId = overData?.type === "column" ? over.id : findColumnOfTask(over.id);
-    if (!srcColId || !destColId) return;
+  if (!over || active.id === over.id) return;
+
+  const srcColId = findColumnOfTask(active.id);
+
+  const overData = over?.data?.current;
+  const destColId =
+    overData?.type === "column"
+      ? over.id
+      : findColumnOfTask(over.id);
+
+  if (!srcColId || !destColId) return;
+  if (srcColId === destColId && over.id === active.id) return;
     setTasks(prev => {
       const srcList  = [...(prev[srcColId]  || [])];
       const destList = srcColId === destColId ? srcList : [...(prev[destColId] || [])];
@@ -265,28 +272,59 @@ const taskColumnMap = useMemo(() => {
     });
   }, [findColumnOfTask]);
 
-  const handleDragEnd = useCallback(async ({ active, over }) => {
-    const srcColId  = activeColId;
-    const taskTitle = activeTask?.title || "Task";
-    setActiveTask(null);
-    setActiveColId(null);
-    if (!over) return;
-    const overData  = over.data.current;
-    const destColId =
-  overData?.type === "column"
-    ? over.id
-    : findColumnOfTask(over.id);
-    if (!srcColId || !destColId || srcColId === destColId) return;
-    const destColName = columns.find(c => c._id === destColId)?.name || "column";
-    logActivity("move", `"${taskTitle}" moved to ${destColName}`);
-    try {
+const handleDragEnd = useCallback(async ({ active, over }) => {
+  const srcColId  = activeColId;
+  const taskTitle = activeTask?.title || "Task";
+
+  setActiveTask(null);
+  setActiveColId(null);
+
+  if (!over) return;
+  if (active.id === over.id) return;
+
+  const overData = over?.data?.current;
+
+  const destColId =
+    overData?.type === "column"
+      ? over.id
+      : findColumnOfTask(over.id);
+
+  if (!srcColId || !destColId) return;
+
+  const srcColName  = columns.find(c => c._id === srcColId)?.name || "column";
+  const destColName = columns.find(c => c._id === destColId)?.name || "column";
+
+  try {
+
+    if (srcColId !== destColId) {
       await updateTask(active.id, { columnId: destColId });
-    } catch (err) {
-      if (err.response?.status === 401) { navigate("/login"); return; }
-      setError("Failed to move task — reverting changes");
-      load();
+
+      logActivity(
+        "move",
+        `"${taskTitle}" moved from ${srcColName} → ${destColName}`,
+        "task",
+        active.id
+      );
+    } else {
+      logActivity(
+        "reorder",
+        `"${taskTitle}" reordered in ${srcColName}`,
+        "task",
+        active.id
+      );
     }
-  }, [activeColId, activeTask, columns, findColumnOfTask, load, logActivity, navigate]);
+
+  } catch (err) {
+    if (err.response?.status === 401) {
+      navigate("/login");
+      return;
+    }
+
+    setError("Failed to move task — reverting changes");
+    load();
+  }
+
+}, [activeColId, activeTask, columns, findColumnOfTask, load, logActivity, navigate]);
 
   // ── Column management ───────────────────────────────────────────────────────
   const addColumn = async () => {
@@ -463,6 +501,7 @@ const taskColumnMap = useMemo(() => {
   return (
     <DndContext
       sensors={sensors}
+      autoScroll={true}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
@@ -900,10 +939,10 @@ const taskColumnMap = useMemo(() => {
         </div>
 
         {/* ══ KANBAN BOARD ════════════════════════════════════════════════════ */}
-        <div className="max-w-500 mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
+        <div className="max-w-[2000px] mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
           <div
               className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
-              
+              style={{ touchAction: "pan-y" }}
             >
             {columns.map((col, index) => {
               const columnTasks   = Array.isArray(tasks[col._id]) ? tasks[col._id] : [];
@@ -999,7 +1038,7 @@ const taskColumnMap = useMemo(() => {
       </div>
 
       <DragOverlay dropAnimation={DROP_ANIMATION}>
-        <OverlayCard task={activeTask} />
+        {activeTask && <OverlayCard task={activeTask} />}
       </DragOverlay>
 
       <style>{`
@@ -1025,10 +1064,14 @@ const taskColumnMap = useMemo(() => {
         @media (max-width: 640px) {
           .snap-x { scroll-padding-left: 12px; }
         }
+        [data-dnd-kit-drag-overlay] {
+          pointer-events: none;
+          will-change: transform;
+        }
 
         [data-dnd-kit-draggable] {
-  user-select: none;
-}
+          user-select: none;
+        }
       `}</style>
     </DndContext>
   );
