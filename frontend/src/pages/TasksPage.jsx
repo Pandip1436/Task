@@ -242,11 +242,19 @@ const taskColumnMap = useMemo(() => {
   }, [findColumnOfTask]);
 
   const handleDragOver = useCallback(({ active, over }) => {
-    if (!over || active.id === over.id) return;
-    const srcColId  = findColumnOfTask(active.id);
-    const overData  = over.data.current;
-    const destColId = overData?.type === "column" ? over.id : findColumnOfTask(over.id);
-    if (!srcColId || !destColId) return;
+  if (!over || active.id === over.id) return;
+
+  const srcColId = findColumnOfTask(active.id);
+
+  const overData = over?.data?.current;
+  const destColId =
+    overData?.type === "column"
+      ? over.id
+      : findColumnOfTask(over.id);
+
+  if (!srcColId || !destColId) return;
+
+  if (srcColId === destColId && over.id === active.id) return;
     setTasks(prev => {
       const srcList  = [...(prev[srcColId]  || [])];
       const destList = srcColId === destColId ? srcList : [...(prev[destColId] || [])];
@@ -271,7 +279,7 @@ const taskColumnMap = useMemo(() => {
     setActiveColId(null);
     if (!over) return;
     if (active.id === over.id) return;
-    const overData  = over.data.current;
+    const overData = over?.data?.current;
     const destColId =
   overData?.type === "column"
     ? over.id
@@ -1028,6 +1036,7 @@ const taskColumnMap = useMemo(() => {
         }
         [data-dnd-kit-drag-overlay] {
           pointer-events: none;
+          will-change: transform;
         }
 
         [data-dnd-kit-draggable] {
