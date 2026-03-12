@@ -126,7 +126,9 @@ export default function TasksPage() {
         colRes.data.map(col => getTasksByColumn(col._id).then(res => ({ id: col._id, data: res.data })))
       );
       const map = {};
-      results.forEach(({ id, data }) => { map[id] = data; });
+      results.forEach(({ id, data }) => {
+        map[id] = data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      });
       setTasks(map);
     } catch (err) {
       if (err.response?.status === 401) {
@@ -293,7 +295,16 @@ const taskColumnMap = useMemo(() => {
   }
 
   try {
-    await updateTask(active.id, { columnId: destColId });
+    const updatedList = tasksRef.current[destColId];
+
+await Promise.all(
+  updatedList.map((task, index) =>
+    updateTask(task._id, {
+      columnId: destColId,
+      order: index
+    })
+  )
+);
   } catch (err) {
     if (err.response?.status === 401) {
       navigate("/login");
@@ -370,7 +381,12 @@ const taskColumnMap = useMemo(() => {
     if (!newTask[columnId]?.trim()) return;
     const title = newTask[columnId];
     try {
-      const res = await createTask({ title, columnId, boardId });
+      const res = await createTask({
+        title,
+        columnId,
+        boardId,
+        order: (tasks[columnId]?.length || 0)
+      });
       setTasks(prev => ({ ...prev, [columnId]: [...(prev[columnId] || []), res.data] }));
       logActivity("create", `Task "${title}" created`);
       setNewTask(prev => ({ ...prev, [columnId]: "" }));
