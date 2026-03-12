@@ -795,8 +795,8 @@ if (srcColId === destColId && active.id === over.id) return;
             </svg>
             <input
               type="text"
-              id="task-search"
-              name="taskSearch"
+              id="taskMobile-search"
+              name="taskMobileSearch"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search tasks…"
