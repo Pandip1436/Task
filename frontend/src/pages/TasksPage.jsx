@@ -270,6 +270,7 @@ const taskColumnMap = useMemo(() => {
     setActiveTask(null);
     setActiveColId(null);
     if (!over) return;
+    if (active.id === over.id) return;
     const overData  = over.data.current;
     const destColId =
   overData?.type === "column"
@@ -903,7 +904,7 @@ const taskColumnMap = useMemo(() => {
         <div className="max-w-[2000px] mx-auto px-3 sm:px-5 md:px-6 lg:px-8 pb-24 md:pb-12">
           <div
               className="flex gap-3 sm:gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 sm:pb-6 -mx-3 px-3 sm:mx-0 sm:px-0 items-start snap-x snap-mandatory md:snap-none"
-              
+              style={{ touchAction: "pan-y" }}
             >
             {columns.map((col, index) => {
               const columnTasks   = Array.isArray(tasks[col._id]) ? tasks[col._id] : [];
@@ -999,8 +1000,8 @@ const taskColumnMap = useMemo(() => {
       </div>
 
       <DragOverlay dropAnimation={DROP_ANIMATION}>
-      {activeTask ? <OverlayCard task={activeTask} /> : null}
-    </DragOverlay>
+        {activeTask && <OverlayCard task={activeTask} />}
+      </DragOverlay>
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
@@ -1025,10 +1026,13 @@ const taskColumnMap = useMemo(() => {
         @media (max-width: 640px) {
           .snap-x { scroll-padding-left: 12px; }
         }
+        [data-dnd-kit-drag-overlay] {
+          pointer-events: none;
+        }
 
         [data-dnd-kit-draggable] {
-  user-select: none;
-}
+          user-select: none;
+        }
       `}</style>
     </DndContext>
   );
